@@ -12,4 +12,4 @@ git reset --hard origin/master
 chmod -R 777 ~/Q2A_Pi
 
 #run script
-./likes.py
+./sendLikes.py

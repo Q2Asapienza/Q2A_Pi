@@ -105,34 +105,47 @@ class Q2A:
     #endregion
 
     #region Utility for user
-    def getQuestions(self, category:str = None, questions = []) -> list:
+    def getAllQuestions(self, category:str = None) -> list:
+        page = 1
+        questions = []
+        while(True):
+            added = self.getQuestions(category=category,page=page)
+            #going to next page
+            if(len(added) == 0):
+                break
+            questions.extend(added)
+            page += 1
+        return questions
+
+    def getQuestions(self, page:int = 1, category:str = None) -> list:
         """
-        Get questions from a page or a category.
+        Get questions from a page.
 
         Params:
-        category(str): the id of the category
-        questions(list): the list in wich the found questions will be added
+        page(int): The number of the page
+        category(str): The id of the category
 
         Return:
         A list containing the Questions found
         """
-        #setting default category if category doesn't exists
-        if not category:
+        if(category == None):
             category = self.category
 
-        current = 0
-        repeat = True
-        while(repeat):
-            tree = self.getHTMLFromURL(self.QUESTION_PAGE+category +"?start=" +str(current),self.session)
-            #adding the questions of this page
-            currentQuestions = tree.cssselect('div.qa-q-list-item')
-            repeat = len(currentQuestions) > 0
-            for question in currentQuestions:
-                question_id = question.attrib['id'][1:]
-                if(question_id not in questions):
-                    questions.append(Question(question_id,self))
-            #going to next page
-            current += 20
+        questions = []
+        #loading page
+        tree = self.getHTMLFromURL(self.QUESTION_PAGE+category +"?start=" +str((page-1)*20),self.session)
+        currentQuestions = tree.cssselect('div.qa-q-list-item')
+        for question in currentQuestions:
+            question_id = question.attrib['id'][1:]
+            question_title = question.cssselect(".qa-q-item-title span")[0].text
+            who = question.cssselect('.qa-user-link')[0].attrib["href"]
+            lastEdit = {
+                "what":question.cssselect('.qa-q-item-what')[0].text,
+                "when":question.cssselect('.qa-q-item-when-data')[0].text,
+                'who':User(who[who.rfind('/')])
+                }
+            if(question_id not in questions):
+                questions.append(Question(question_id,self,title=question_title, lastEdit=lastEdit))
         return questions
 
     def getLikes(self, questions:list ,refresh:bool=False) -> list:
@@ -140,7 +153,7 @@ class Q2A:
         question:Question
         for question in questions:
             if(refresh):
-                question.update()
+                question.get()
                 likes.extend(question.likes)
         return likes
     #endregion
@@ -190,9 +203,15 @@ class Question:
     def id(self) -> str:
         return self.__id
     likes:list
+    lastEdit:dict
+    title:str
+    preview:str
 
-    def __init__(self,id,q2a):
+    def __init__(self,id,q2a,**args):
             self.q2a:Q2A = q2a
+            for key,value in args.items():
+                self.__setattr__(key,value)
+
             if id in Question.__dict:
                 self = Question.__dict[id]
             else:
@@ -203,7 +222,7 @@ class Question:
     def getHTML(self):
         return self.q2a.getHTMLFromURL(Q2A.BASE_URL+self.__id, self.q2a.session)
 
-    def update(self):
+    def get(self):
         self.likes = []
         tree = self.q2a.getHTMLFromURL(Q2A.BASE_URL+self.__id, self.q2a.session)
         for like in tree.cssselect(".qa-voting"):
@@ -226,3 +245,12 @@ class Question:
         result = self.__eq__(other)
         return result if result is NotImplemented else not result 
     #endregion
+
+class User:
+    __id:str
+    @property
+    def id(self):
+        return self.__id
+    
+    def __init__(self,id):
+        self.__id = id

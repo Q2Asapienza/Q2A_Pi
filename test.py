@@ -30,26 +30,9 @@ if __name__ == "__main__":
     print("GOT: " + str(len(questions)) + " questions")
     separator()
 
-    print("GETTING LIKES...")
-    likes = q2a.getLikes(questions,True)
-    
-    like:Like
-    likeableLikes = [like for like in likes if like.voted == False]
-    print("GOT: "+str(len(likes))+" likes ("+str(len(likeableLikes))+" not liked)")
-    separator()
-
-    #sending likes
-    print("SENDING LIKES:")
-    sent = 0
-    for like in likeableLikes:
-        result = like.vote()
-        if(result == True):
-            sent += 1
-        else:
-            print("NOT ALL LIKES SENT!!!")
-            print(result)
-            break
-    print("LIKES SENT: " + str(sent))
+    print("LAST EDITS...")
+    for question in questions:
+        print(question.title, question.lastEdit)
     separator()
     
     print("DONE!")  

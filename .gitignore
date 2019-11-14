@@ -110,3 +110,4 @@ venv.bak/
 #program
 data/q2a.ses
 data/login.json
+test.py

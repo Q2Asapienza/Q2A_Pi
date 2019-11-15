@@ -10,6 +10,7 @@ class Q2A:
     QUESTION_PAGE = "https://q2a.di.uniroma1.it/questions/"
     LOGIN_URL = "https://q2a.di.uniroma1.it/login?to="
     USER_URL = "https://q2a.di.uniroma1.it/user"
+    ACTIVITY_PAGE = "https://q2a.di.uniroma1.it/activity"
 
     def __init__(self, username:str, password:str, category = "fondamenti-di-programmazione-19-20"):
         """
@@ -22,8 +23,8 @@ class Q2A:
         self.session.headers.update({"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36"})
 
     #region utility
-    def getHTMLFromURL(self, url:str, session) -> html.HtmlElement:
-        return html.fromstring(session.get(url).text)
+    def getHTMLFromURL(self, url:str) -> html.HtmlElement:
+        return html.fromstring(self.session.get(url).text)
 
     def getCode(self, tree:html.HtmlElement) -> str:
         return tree.cssselect('input[name="code"]')[0].attrib['value']
@@ -131,10 +132,20 @@ class Q2A:
         if(category == None):
             category = self.category
 
-        questions = []
+        return self.__questionsFromURL(self.QUESTION_PAGE+category +"?start=" +str((page-1)*20))
         #loading page
-        tree = self.getHTMLFromURL(self.QUESTION_PAGE+category +"?start=" +str((page-1)*20),self.session)
-        currentQuestions = tree.cssselect('div.qa-q-list-item')
+
+    def getQuestionsFromActivities(self, category:str = None):
+        if(category == None):
+            category = self.category
+        return self.__questionsFromURL(self.ACTIVITY_PAGE + category)
+        
+        
+
+    def __questionsFromURL(self,url:str) ->list:
+        tree = self.getHTMLFromURL(url)
+        questions = []
+        currentQuestions = tree.cssselect('.qa-part-q-list .qa-q-list-item')
         for question in currentQuestions:
             question_id = question.attrib['id'][1:]
             question_title = question.cssselect(".qa-q-item-title span")[0].text

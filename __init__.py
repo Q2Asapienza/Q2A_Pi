@@ -298,10 +298,10 @@ class Q2A:
             question[KEY_ANSWERS] = answers
         return answers
 
-    def getCommentsFromAnswers(self,answer:dict, update=True):
+    def getCommentsFromAnswers(self,answers:dict, update=True):
         comments = {}
-        for question in questions.values():
-            comments.update(self.getAnswersFromQuestion(question,update))
+        for answer in answers.values():
+            comments.update(self.getCommentsFromAnswer(answer,update))
         return comments
 
     def getCommentsFromAnswer(self, answer:dict, update=True):

@@ -268,7 +268,7 @@ class Q2A:
     def getAnswersFromQuestions(self,questions:dict, update=True) -> dict:
         answers = {}
         for question in questions.values():
-            answers.update(self.getAnswersFromQuestion(question), update)
+            answers.update(self.getAnswersFromQuestion(question, update))
         return answers
 
     def getAnswersFromQuestion(self,question:dict, update=True) -> dict:
@@ -301,7 +301,7 @@ class Q2A:
     def getCommentsFromAnswers(self,answer:dict, update=True):
         comments = {}
         for question in questions.values():
-            comments.update(self.getAnswersFromQuestion(question),update)
+            comments.update(self.getAnswersFromQuestion(question,update))
         return comments
 
     def getCommentsFromAnswer(self, answer:dict, update=True):

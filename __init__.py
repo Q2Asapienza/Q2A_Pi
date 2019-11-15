@@ -45,7 +45,7 @@ def Q2ADictToSerializable(q2a_dict:dict):
             #removing circular reference
             q2a_dict[key] = value[KEY_ID]
         elif isinstance(value,dict):
-            q2a_dict[key] = Q2AToSerializable(value)
+            q2a_dict[key] = Q2ADictToSerializable(value)
     
     return q2a_dict
 

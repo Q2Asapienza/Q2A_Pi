@@ -364,21 +364,3 @@ class Q2A:
                 voted = name if name == None else (name.split("_")[2] == '0')
                 likes.append({Keys.ID:like.attrib["id"].split("_")[1], Keys.VOTED:voted})
         return likes
-
-if __name__ == "__main__":
-    import pprint,json
-    pp = pprint.PrettyPrinter()
-    
-
-    q2a = Q2A()
-    questions = q2a.getQuestionsFromActivities()
-    question1 = questions[list(questions.keys())[0]]
-    
-    answers = q2a.getAnswersFromQuestion(question1)
-    answer1 = answers[list(answers.keys())[0]]
-
-    comments = q2a.getCommentsFromAnswer(answer1)
-    comment1 = comments[list(comments.keys())[0]]
-        
-    print(json.dumps(questions, indent=4, sort_keys=True))
-    #print(pprint.pformat(questions))

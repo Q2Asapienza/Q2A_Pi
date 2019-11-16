@@ -5,8 +5,9 @@ import cssselect
 from lxml import html
 from typing import List
 
+
 class Keys:
-    #KEYS FOR DICTIONARIES
+    # KEYS FOR DICTIONARIES
     #types
     TYPE            = 'types'
     TYPE_QUESTIONS  = 'questions'
@@ -367,3 +368,5 @@ class Q2A:
                 voted = name if name == None else (name.split("_")[2] == '0')
                 likes.append({Keys.ID:like.attrib["id"].split("_")[1], Keys.VOTED:voted})
         return likes
+
+# flake8: noqa #This is required for my mental stability

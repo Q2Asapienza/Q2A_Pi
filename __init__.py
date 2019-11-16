@@ -102,7 +102,7 @@ class Q2A:
     def __getEdit(tree:html.HtmlElement,index:int) -> dict:
         edit_timestamp = tree.cssselect('.updated .value-title')[index].attrib['title']
         edit_who = Q2A.__userID(tree.cssselect('.author a')[index].attrib['href'])
-        edit_what = tree.cssselect('.qa-a-item-what')[index].text
+        edit_what = tree.cssselect('.qa-q-view-what, .qa-a-item-what, .qa-c-item-what')[index].text
         return {Keys.USER: edit_who, Keys.TIMESTAMP:edit_timestamp, Keys.EDIT: edit_what}
 
     @staticmethod

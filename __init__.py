@@ -14,22 +14,24 @@ class Keys:
     TYPE_COMMENTS   = 'comments'
 
     #general data
-    ID              = 'id'
-    TEXT            = 'text'
-    PARENT          = 'parent'
+    ID                  = 'id'
+    TEXT                = 'text'
+    PARENT              = 'parent'
     #edits
-    CREATED         = 'created'
-    LAST_EDIT       = 'last_edit'
+    CREATED             = 'created'
+    LAST_EDIT           = 'last_edit'
 
-    TIMESTAMP       = 'timestamp'
-    USER            = 'user'
+    EDIT        = WHAT  = 'edit'
+    TIMESTAMP   = WHEN  = 'timestamp'
+    USER        = WHO   = 'user'
+
 
     #question data
-    TITLE           = 'title'
+    TITLE               = 'title'
     #answer data
-    BEST            = 'best'
+    BEST                = 'best'
     #like data
-    VOTED           = 'voted'
+    VOTED               = 'voted'
 
 #urls
 URL_BASE        = "https://q2a.di.uniroma1.it/"
@@ -100,7 +102,8 @@ class Q2A:
     def __getEdit(tree:html.HtmlElement,index:int) -> dict:
         edit_timestamp = tree.cssselect('.updated .value-title')[index].attrib['title']
         edit_who = Q2A.__userID(tree.cssselect('.author a')[index].attrib['href'])
-        return {Keys.USER: edit_who, Keys.TIMESTAMP:edit_timestamp}
+        edit_what = tree.cssselect('.qa-a-item-what')[index].text
+        return {Keys.USER: edit_who, Keys.TIMESTAMP:edit_timestamp, Keys.EDIT: edit_what}
 
     @staticmethod
     def __firstEdit(tree:html.HtmlElement) -> dict:

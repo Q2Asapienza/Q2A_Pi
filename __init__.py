@@ -309,11 +309,11 @@ class Q2A:
         answerComments = self.__getHTMLFromURL(URL_BASE + answer[Keys.PARENT][Keys.ID]).cssselect(f'#a{answer[Keys.ID]} .comment')
         comments = {}
         for commentDiv in answerComments:
-            comment = {Keys.TYPE:Keys.TYPE_ANSWERS}
+            comment = {Keys.TYPE:Keys.TYPE_COMMENTS}
 
             #getting data from answer
             comment[Keys.ID]            = commentDiv.attrib['id'][1:]
-            comment[Keys.CREATED]    = Q2A.__firstEdit(commentDiv)
+            comment[Keys.CREATED]       = Q2A.__firstEdit(commentDiv)
             comment[Keys.LAST_EDIT]     = Q2A.__lastEdit(commentDiv)
             comment[Keys.TEXT]          = commentDiv.cssselect(".entry-content")[0].text_content()
 

@@ -5,6 +5,32 @@ import cssselect
 from lxml import html
 from typing import List
 
+class Keys:
+    #KEYS FOR DICTIONARIES
+    #types
+    TYPE            = 'types'
+    TYPE_QUESTIONS  = 'questions'
+    TYPE_ANSWERS    = 'answers'
+    TYPE_COMMENTS   = 'comments'
+
+    #general data
+    ID              = 'id'
+    TEXT            = 'text'
+    PARENT          = 'parent'
+    #edits
+    CREATED         = 'created'
+    LAST_EDIT       = 'last_edit'
+
+    TIMESTAMP       = 'timestamp'
+    USER            = 'user'
+
+    #question data
+    TITLE           = 'title'
+    #answer data
+    BEST            = 'best'
+    #like data
+    VOTED           = 'voted'
+
 #urls
 URL_BASE        = "https://q2a.di.uniroma1.it/"
 URL_QUESTIONS   = "https://q2a.di.uniroma1.it/questions/"
@@ -13,37 +39,12 @@ URL_USER        = "https://q2a.di.uniroma1.it/user"
 URL_USERS       = "https://q2a.di.uniroma1.it/users"
 URL_ACTIVITIES  = "https://q2a.di.uniroma1.it/activity/"
 
-#KEYS FOR DICTIONARIES
-#types
-KEY_TYPE        = 'types'
-KEY_QUESTIONS   = 'questions'
-KEY_ANSWERS     = 'answers'
-KEY_COMMENTS    = 'comments'
-
-#general data
-KEY_ID          = 'id'
-KEY_TEXT        = 'text'
-KEY_PARENT      = 'parent'
-#edits
-KEY_CREATED     = 'created'
-KEY_LAST_EDIT   = 'last_edit'
-
-KEY_TIMESTAMP   = 'timestamp'
-KEY_USER        = 'user'
-
-#question data
-KEY_TITLE       = 'title'
-#answer data
-KEY_BEST        = 'best'
-#like data
-KEY_VOTED       = 'voted'
-
 def Q2ADictToSerializable(q2a_dict:dict):
     q2a_dict = q2a_dict.copy()
     for key,value in q2a_dict.items():
-        if key == KEY_PARENT and isinstance(value,dict):
+        if key == Keys.PARENT and isinstance(value,dict):
             #removing circular reference
-            q2a_dict[key] = value[KEY_ID]
+            q2a_dict[key] = value[Keys.ID]
         elif isinstance(value,dict):
             q2a_dict[key] = Q2ADictToSerializable(value)
     
@@ -99,7 +100,7 @@ class Q2A:
     def __getEdit(tree:html.HtmlElement,index:int) -> dict:
         edit_timestamp = tree.cssselect('.updated .value-title')[index].attrib['title']
         edit_who = Q2A.__userID(tree.cssselect('.author a')[index].attrib['href'])
-        return {KEY_USER: edit_who, KEY_TIMESTAMP:edit_timestamp}
+        return {Keys.USER: edit_who, Keys.TIMESTAMP:edit_timestamp}
 
     @staticmethod
     def __firstEdit(tree:html.HtmlElement) -> dict:
@@ -114,27 +115,27 @@ class Q2A:
         questions = {}
         pageQuestions = tree.cssselect('.qa-part-q-list .qa-q-list-item')
         for questionDiv in pageQuestions:
-            question = {KEY_TYPE:KEY_QUESTIONS}
+            question = {Keys.TYPE:Keys.TYPE_QUESTIONS}
             #getting out data from question
             
-            question[KEY_ID]            = questionDiv.attrib['id'][1:]
-            question[KEY_TITLE]         = questionDiv.cssselect(".qa-q-item-title span")[0].text
+            question[Keys.ID]            = questionDiv.attrib['id'][1:]
+            question[Keys.TITLE]         = questionDiv.cssselect(".qa-q-item-title span")[0].text
             #getting last edit from what, when, who, not really reliable as it depends on if you use questions or activities
             #who = questionDiv.cssselect('.qa-user-link')[0].attrib['href']
-            #question[KEY_LAST_EDI T] = {
+            #question[Keys.LAST_EDI T] = {
             #    'what':questionDiv.cssselect('.qa-q-item-what')[0].text,
             #    'when':questionDiv.cssselect('.qa-q-item-when-data')[0].text,
             #    'who':who[who.rfind('/')]
             #}
 
             #navigating to question to get inner data
-            questionInnerDiv = self.__getHTMLFromURL(URL_BASE+question[KEY_ID]).cssselect('div.question')[0]
-            question[KEY_CREATED]       = Q2A.__firstEdit(questionInnerDiv)
-            question[KEY_LAST_EDIT]     = Q2A.__lastEdit(questionInnerDiv)
-            question[KEY_TEXT]          = questionInnerDiv.cssselect(".entry-content")[0].text_content()
+            questionInnerDiv = self.__getHTMLFromURL(URL_BASE+question[Keys.ID]).cssselect('div.question')[0]
+            question[Keys.CREATED]       = Q2A.__firstEdit(questionInnerDiv)
+            question[Keys.LAST_EDIT]     = Q2A.__lastEdit(questionInnerDiv)
+            question[Keys.TEXT]          = questionInnerDiv.cssselect(".entry-content")[0].text_content()
 
             #appending question to questions
-            questions[question[KEY_ID]] = question
+            questions[question[Keys.ID]] = question
 
         return questions
     #endregion
@@ -272,30 +273,30 @@ class Q2A:
         return answers
 
     def getAnswersFromQuestion(self,question:dict, update=True) -> dict:
-        pageAnswers = self.__getHTMLFromURL(URL_BASE + question[KEY_ID]).cssselect("div.answer")
+        pageAnswers = self.__getHTMLFromURL(URL_BASE + question[Keys.ID]).cssselect("div.answer")
         answers = {}
         for answerDiv in pageAnswers:
-            answer = {KEY_TYPE:KEY_ANSWERS}
+            answer = {Keys.TYPE:Keys.TYPE_ANSWERS}
 
             #getting data from answer
-            answer[KEY_ID]            = answerDiv.attrib['id'][1:]
+            answer[Keys.ID]            = answerDiv.attrib['id'][1:]
             
             #this is necessary otherwise it will get the last edit from the last comment inside the answer
             editDiv = answerDiv.cssselect(".qa-a-item-wrapper")[0]
-            answer[KEY_CREATED]    = Q2A.__firstEdit(editDiv)
-            answer[KEY_LAST_EDIT]     = Q2A.__lastEdit(editDiv)
+            answer[Keys.CREATED]    = Q2A.__firstEdit(editDiv)
+            answer[Keys.LAST_EDIT]     = Q2A.__lastEdit(editDiv)
 
-            answer[KEY_TEXT]          = answerDiv.cssselect(".entry-content")[0].text_content()
+            answer[Keys.TEXT]          = answerDiv.cssselect(".entry-content")[0].text_content()
 
-            answer[KEY_PARENT]        = question
+            answer[Keys.PARENT]        = question
             
             if(len(answerDiv.cssselect('.qa-a-selected')) != 0):
-                question [KEY_BEST] =  answer[KEY_ID] 
+                question [Keys.BEST] =  answer[Keys.ID] 
 
             #appending question to questions
-            answers[answer[KEY_ID] ] = answer
+            answers[answer[Keys.ID] ] = answer
         if(update):
-            question[KEY_ANSWERS] = answers
+            question[Keys.TYPE_ANSWERS] = answers
         return answers
 
     def getCommentsFromAnswers(self,answers:dict, update=True):
@@ -305,23 +306,23 @@ class Q2A:
         return comments
 
     def getCommentsFromAnswer(self, answer:dict, update=True):
-        answerComments = self.__getHTMLFromURL(URL_BASE + answer[KEY_PARENT][KEY_ID]).cssselect(f'#a{answer[KEY_ID]} .comment')
+        answerComments = self.__getHTMLFromURL(URL_BASE + answer[Keys.PARENT][Keys.ID]).cssselect(f'#a{answer[Keys.ID]} .comment')
         comments = {}
         for commentDiv in answerComments:
-            comment = {KEY_TYPE:KEY_ANSWERS}
+            comment = {Keys.TYPE:Keys.TYPE_ANSWERS}
 
             #getting data from answer
-            comment[KEY_ID]            = commentDiv.attrib['id'][1:]
-            comment[KEY_CREATED]    = Q2A.__firstEdit(commentDiv)
-            comment[KEY_LAST_EDIT]     = Q2A.__lastEdit(commentDiv)
-            comment[KEY_TEXT]          = commentDiv.cssselect(".entry-content")[0].text_content()
+            comment[Keys.ID]            = commentDiv.attrib['id'][1:]
+            comment[Keys.CREATED]    = Q2A.__firstEdit(commentDiv)
+            comment[Keys.LAST_EDIT]     = Q2A.__lastEdit(commentDiv)
+            comment[Keys.TEXT]          = commentDiv.cssselect(".entry-content")[0].text_content()
 
-            comment[KEY_PARENT]        = answer
+            comment[Keys.PARENT]        = answer
 
             #appending question to questions
-            comments[comment[KEY_ID] ] = comment
+            comments[comment[Keys.ID] ] = comment
         if(update):
-            answer[KEY_COMMENTS] = comments
+            answer[Keys.TYPE_COMMENTS] = comments
         return comments
 
     def sendVote(self, like:dict, upVote:bool = True):
@@ -357,11 +358,11 @@ class Q2A:
     def getLikes(self,**questions)-> list:
         likes = []
         for question in questions:
-            tree = self.__getHTMLFromURL(URL_BASE+question[KEY_ID])
+            tree = self.__getHTMLFromURL(URL_BASE+question[Keys.ID])
             for like in tree.cssselect(".qa-voting"):
                 name = like.cssselect(".qa-vote-one-button")[0].get("name")
                 voted = name if name == None else (name.split("_")[2] == '0')
-                likes.append({KEY_ID:like.attrib["id"].split("_")[1], KEY_VOTED:voted})
+                likes.append({Keys.ID:like.attrib["id"].split("_")[1], Keys.VOTED:voted})
         return likes
 
 if __name__ == "__main__":

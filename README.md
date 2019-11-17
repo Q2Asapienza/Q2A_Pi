@@ -1,6 +1,13 @@
-# Q2A_Pi
+# DEPRECATED - Q2A_Pi
+
 
 Interface for python for communicating with q2a.di.uniroma1.it
+
+## Deprecated, why?
+
+Python is cool and everything but it's more likely to find a cheap webserver capable of running PHP, than one capable of running python, so the library was good only for testing purposes.
+
+From now on updates will only be done to the new [PHP version](https://github.com/Q2Asapienza/Q2A-php-interface) of the library.
 
 ## Setup
 
